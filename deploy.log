@@ -1,0 +1,5 @@
+
+> srt-translate@1.0.0 deploy
+> gh-pages -d dist
+
+Published
