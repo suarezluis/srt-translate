@@ -36,6 +36,7 @@ const main = async () => {
         currentDirectory,
         process.argv[3]?.replace(/\n/g, ".") || ""
       );
+      console.log(`Renaming ${fileToRename} to ${renamedFile}...`);
       renameSync(fileToRename, renamedFile);
       return;
   }
