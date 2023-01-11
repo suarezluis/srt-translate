@@ -8,7 +8,8 @@
     "deploy": "gh-pages -d dist",
     "serve": "live-server --port=3333",
     "build": "rm -rf build ; tsc --outDir build ; cp .env build ; mkdir build/dist",
-    "install": "npm run build ; node build/index.js install"
+    "install": "npm run build ; node build/index.js install",
+    "update": "git pull origin master ; npm run build"
   },
   "keywords": [],
   "author": "",
