@@ -29,6 +29,10 @@ const main = async () => {
       );
       return;
   }
+  if (!inputFile) {
+    console.log("Please provide an input file");
+    return;
+  }
   const inputExtension = inputFile.split(".").pop();
   if (inputExtension === "srt") {
     const translator = new SrtTranslator(inputFile, outputFile);
