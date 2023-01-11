@@ -5,6 +5,7 @@ import { launch } from "puppeteer";
 import chalk from "chalk";
 import path from "path";
 import * as dotenv from "dotenv";
+import Status from "./Status";
 
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 export interface SrtObject {
@@ -40,7 +41,7 @@ export default class SrtTranslator {
     outputFileName: string,
     removeInputOnCompletion = false
   ) {
-    this.localDeployment = true;
+    this.localDeployment = false;
     this.pathToDist = path.join(__dirname, "..", "dist");
     this.localPageURL = localServerURL || "";
     this.githubPagesURL = githubPagesURL || "";
@@ -76,24 +77,22 @@ export default class SrtTranslator {
     const translatedStrString = this.srtObjectToSrtString(
       this.srtTranslatedObjects
     );
-    this.printStatus("Writing translated file", "Working", "yellow");
+    const writingTranslatedFileStatus = new Status(
+      "Writing translated file",
+      "Working"
+    );
     this.writeContentToFile(this.outputFileName, translatedStrString);
-    this.printStatus("Writing translated file", "Done", "green", true);
+    writingTranslatedFileStatus.complete();
     if (this.removeInputOnCompletion) {
-      this.printStatus(
-        `\n Removing ${this.inputFileName}`,
-        "Working",
-        "yellow"
+      const removingInputFileStatus = new Status(
+        "Removing input srt file",
+        "Working"
       );
       unlinkSync(this.inputFileName);
-      this.printStatus(`\n${this.outputFileName}`, "Working", "green", true);
+      removingInputFileStatus.complete();
     }
-    this.printStatus(
-      `\n Removing ${this.inputFileName}`,
-      "Complete\n",
-      "green",
-      true
-    );
+    console.log("");
+    process.exit(0);
   };
 
   readFile(fileName: string) {
@@ -149,7 +148,11 @@ export default class SrtTranslator {
 
   deployLocally = async () => {
     const pathToServe = path.join(__dirname, "..", "dist", "index.html");
-    this.printStatus("Deploying to localhost:3333", "Working", "yellow");
+
+    const localDeploymentStatus = new Status(
+      "Deploying to localhost:3333",
+      "Working"
+    );
     this.childProcess = exec(
       `live-server --port=3333 --no-browser ${pathToServe}`,
       (error, stdout, stderr) => {
@@ -161,26 +164,29 @@ export default class SrtTranslator {
       }
     );
     await this.delay(1000);
-    this.printStatus("Deploying to localhost:3333", "Deployed", "green", true);
+    localDeploymentStatus.complete();
   };
 
   testLocalPage = async () => {
     let status = false;
 
-    this.printStatus("Launching browser", "Waiting", "yellow");
+    const browserStatus = new Status("Launching browser", "Working");
     const browser = await launch();
-    this.printStatus("Launching browser", "Done", "green", true);
+    browserStatus.complete();
 
-    this.printStatus("Opening page", "Waiting", "yellow");
+    const pageStatus = new Status("Opening page", "Working");
     const page = await browser.newPage();
-    this.printStatus("Opening page", "Done", "green", true);
-    this.printStatus(`Navigating to ${this.localPageURL}`, "waiting", "yellow");
-    await page.goto(this.localPageURL);
-    this.printStatus(
+    pageStatus.complete();
+    const navigationStatus = new Status(
       `Navigating to ${this.localPageURL}`,
-      "Done",
-      "green",
-      true
+      "Working"
+    );
+
+    await page.goto(this.localPageURL);
+    navigationStatus.complete();
+    const checkingRunIdStatus = new Status(
+      "Checking if Run ID is live on localPage",
+      "Working"
     );
     let count = 1;
     while (!status) {
@@ -191,17 +197,11 @@ export default class SrtTranslator {
         return element.innerText;
       });
       if (this.runId === localPageRuID) {
-        this.printStatus(
-          "Checking if Run ID is live on localPage",
-          "Done",
-          "green",
-          true
-        );
+        checkingRunIdStatus.complete();
         status = true;
         await browser.close();
       } else {
-        this.printStatus(
-          "Checking if Run ID is live on localPage",
+        checkingRunIdStatus.update(
           `Retrying ${count} time${count > 1 ? "s" : ""}`,
           "yellow"
         );
@@ -213,42 +213,45 @@ export default class SrtTranslator {
   };
 
   deployToGithubPages = () => {
-    this.printStatus("Deploying to GitHub Pages", "Working", "yellow");
+    const gitHubPagesDeploymentStatus = new Status(
+      "Deploying to GitHub Pages",
+      "Working"
+    );
+
     const output = execSync("npm run deploy");
-    this.printStatus("Deploying to GitHub Pages", "Deployed", "green", true);
     if (output.toString().includes("ERROR")) {
-      this.printStatus("Deploying to GitHub Pages", "Error", "red", true);
+      gitHubPagesDeploymentStatus.update("Error\n", "red");
       console.error(
         "An error occurred while deploying to GitHub Pages, see deployment.log for more details"
       );
       writeFileSync(`deployment.log`, output.toString(), "utf-8");
+    } else {
+      gitHubPagesDeploymentStatus.complete();
     }
   };
 
   testGithubPages = async () => {
     let status = false;
+    const browserStatus = new Status("Launching browser", "Working");
 
-    this.printStatus("Launching browser", "Waiting", "yellow");
     const browser = await launch();
-    this.printStatus("Launching browser", "Done", "green", true);
+    browserStatus.complete();
+    const pageStatus = new Status("Opening page", "Working");
 
-    this.printStatus("Opening page", "Waiting", "yellow");
     const page = await browser.newPage();
-    this.printStatus("Opening page", "Done", "green", true);
+    pageStatus.complete();
+    const navigationStatus = new Status(
+      `Navigating to ${this.githubPagesURL}`,
+      "Working"
+    );
 
-    this.printStatus(
-      `Navigating to ${this.githubPagesURL}`,
-      "waiting",
-      "yellow"
-    );
     await page.goto(this.githubPagesURL);
-    this.printStatus(
-      `Navigating to ${this.githubPagesURL}`,
-      "Done",
-      "green",
-      true
-    );
+    navigationStatus.complete();
     let count = 1;
+    const checkingRunIdStatus = new Status(
+      "Checking if Run ID is live on github pages",
+      "Working"
+    );
     while (!status) {
       await page.waitForNetworkIdle();
       await page.waitForSelector("#run-id");
@@ -257,18 +260,12 @@ export default class SrtTranslator {
         return element.innerText;
       });
       if (this.runId === gitHubRunId) {
-        this.printStatus(
-          "Checking if Run ID is live on github pages",
-          "Done",
-          "green",
-          true
-        );
+        checkingRunIdStatus.complete();
         status = true;
         await browser.close();
       } else {
-        this.printStatus(
-          "Checking if Run ID is live on github pages",
-          `Retrying ${count} time${count > 1 ? "s" : ""}`,
+        checkingRunIdStatus.update(
+          stringToEmoji(`Retrying ${count} time${count > 1 ? "s" : ""}`),
           "yellow"
         );
         await this.delay(5000);
@@ -278,44 +275,27 @@ export default class SrtTranslator {
     }
   };
 
-  printStatus = (
-    body: string,
-    status: string,
-    color: string,
-    newLine: boolean = false
-  ) => {
-    let setColor = (body: string) => {};
-    switch (color) {
-      case "red":
-        setColor = chalk.red;
-        break;
-      case "green":
-        setColor = chalk.green;
-        break;
-      case "yellow":
-        setColor = chalk.yellow;
-        break;
-      default:
-        setColor = chalk.white;
-        break;
-    }
-    process.stdout.clearLine(0);
-    process.stdout.cursorTo(0);
-    process.stdout.write(`${body} ${setColor(status)} ${newLine ? "\n" : ""}`);
-  };
-
   delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   translatePage = async (url: string) => {
+    const browserStatus = new Status("Launching browser", "Waiting");
     const browser = await launch();
+    browserStatus.complete();
+    const pageStatus = new Status("Opening page", "Waiting");
     const page = await browser.newPage();
+    pageStatus.complete();
+    const navigationStatus = new Status(
+      `Navigating to translated URL`,
+      "Waiting"
+    );
     await page.goto(url);
     await page.waitForNetworkIdle();
     await page.waitForSelector("#run-id");
+    navigationStatus.complete();
     const windowHeight = await page.evaluate(() => window.innerHeight);
     const scrollHeight = await page.evaluate(() => document.body.scrollHeight);
     let currentHeight = 0;
-    this.printStatus("Scrolling translation page", "0%", "yellow");
+    const scrollStatus = new Status("Scrolling translation page", "0%");
 
     for (let i = 0; i <= scrollHeight; i += windowHeight) {
       await page.evaluate((i) => {
@@ -326,13 +306,10 @@ export default class SrtTranslator {
       await this.delay(50);
       currentHeight += windowHeight;
       const percentage = parseInt(`${(currentHeight / scrollHeight) * 100}`);
-      this.printStatus(
-        "Scrolling translation page",
-        percentage + "%",
-        percentage === 100 ? "green" : "yellow"
-      );
+      scrollStatus.update(stringToEmoji(percentage + "%"), "yellow");
     }
-
+    scrollStatus.complete();
+    const scriptRemovalStatus = new Status("Removing scripts", "Working");
     const srtTranslatedObjects = await page.evaluate(() => {
       // remove scripts to avoid grabbing original text from the page
       let scripts = document.getElementsByTagName("script");
@@ -381,6 +358,11 @@ export default class SrtTranslator {
       }
       return data;
     });
+    scriptRemovalStatus.complete();
+    const writingTranslatedHTMLStatus = new Status(
+      "Writing translated HTML",
+      "Working"
+    );
     const pageContent = await page.content();
     this.writeContentToFile(
       path.join(this.pathToDist, "translated.html"),
@@ -388,7 +370,10 @@ export default class SrtTranslator {
     );
     this.translatedHTML = pageContent;
     this.srtTranslatedObjects = srtTranslatedObjects;
+    writingTranslatedHTMLStatus.complete();
+    const closingBrowserStatus = new Status("Closing browser", "Working");
     await browser.close();
+    closingBrowserStatus.complete();
   };
 
   srtObjectToSrtString = (srtObjects: SrtObject[]) => {
@@ -402,3 +387,46 @@ export default class SrtTranslator {
     return strString;
   };
 }
+
+const stringToEmoji = (string: string) => {
+  let newString = "";
+  const stringArray = string.split("");
+  for (const char of stringArray) {
+    switch (char) {
+      case "1":
+        newString += "1️⃣ ";
+        break;
+      case "2":
+        newString += "2️⃣ ";
+        break;
+      case "3":
+        newString += "3️⃣ ";
+        break;
+      case "4":
+        newString += "4️⃣ ";
+        break;
+      case "5":
+        newString += "5️⃣ ";
+        break;
+      case "6":
+        newString += "6️⃣ ";
+        break;
+      case "7":
+        newString += "7️⃣ ";
+        break;
+      case "8":
+        newString += "8️⃣ ";
+        break;
+      case "9":
+        newString += "9️⃣ ";
+        break;
+      case "0":
+        newString += "0️⃣ ";
+        break;
+      default:
+        newString += char;
+        break;
+    }
+  }
+  return newString;
+};

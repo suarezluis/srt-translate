@@ -25,6 +25,7 @@ const main = async () => {
   // console.log(inputFile);
   // console.log(outputFile);
   // return;
+  console.log("");
   switch (command) {
     case "install":
       const installation = new Installation();
@@ -62,11 +63,11 @@ const main = async () => {
   }
   const inputExtension = inputFile.split(".").pop();
   if (inputExtension === "srt") {
-    const translator = new SrtTranslator(inputFile, outputFile);
+    new SrtTranslator(inputFile, outputFile);
   } else {
     const extraction = new StrExtractor(inputFile);
     extraction.extract();
-    const translator = new SrtTranslator(
+    new SrtTranslator(
       extraction.outputFile,
       extraction.outputFile.split(".").slice(0, -1).join(".") + ".es.srt",
       true
