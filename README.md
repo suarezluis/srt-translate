@@ -21,3 +21,11 @@ the url to your .env file
 
 Set up your own domain to point at your external ip address (it has to be port 80)
 Configure your router to forward port 80 to port 3333 on your local ip.
+
+### Installation
+
+Run `npm i`
+Run `npm run build`
+Run `npm run install`
+
+restart your terminal or run `source [Your shell rc file]`
