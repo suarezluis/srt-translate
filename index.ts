@@ -3,12 +3,22 @@ import path from "path";
 import StrExtractor from "./Classes/StrExtractor";
 import Installation from "./Classes/Install";
 import SrtTranslator from "./Classes/StrTranslator";
-import { renameSync } from "fs";
+import { renameSync, readdirSync } from "fs";
 
 const currentDirectory = process.cwd();
 const command = process.argv[2];
 const inputFile = path.join(currentDirectory, process.argv[2] || "");
 const outputFile = path.join(currentDirectory, process.argv[3] || "");
+
+const renameFile = (file: string) => {
+  const fileToRename = path.join(currentDirectory, file || "");
+  const renamedFile = path.join(
+    currentDirectory,
+    file?.replace(/\ /g, ".") || ""
+  );
+  console.log(`Renaming ${file} to ${file.replace(/\ /g, ".")}`);
+  renameSync(fileToRename, renamedFile);
+};
 
 const main = async () => {
   // console.log(currentDirectory);
@@ -27,22 +37,23 @@ const main = async () => {
                 -h, --help: show this help message
                 install: install the srt-translate command into rc file
                 rename: rename a file to remove spaces from the name
+                rename-all: rename all files in the current directory to remove spaces from the name
         `
       );
       return;
-    case "rename":
-      const fileToRename = path.join(currentDirectory, process.argv[3] || "");
-      const renamedFile = path.join(
-        currentDirectory,
-        process.argv[3]?.replace(/\ /g, ".") || ""
+    case "rename" || "-r":
+      renameFile(process.argv[3]);
+      return;
+    case "rename-all" || "-ra":
+      const extension = process.argv[3] || "";
+
+      const files = readdirSync(currentDirectory);
+      const filteredFilesByExtension = files.filter((file) =>
+        file.split(".").pop()?.includes(extension)
       );
-      console.log(
-        `Renaming ${process.argv[3]} to ${process.argv[3]?.replace(
-          /\ /g,
-          "."
-        )}...`
-      );
-      renameSync(fileToRename, renamedFile);
+      for (const file of filteredFilesByExtension) {
+        renameFile(file);
+      }
       return;
   }
   if (inputFile === currentDirectory) {
