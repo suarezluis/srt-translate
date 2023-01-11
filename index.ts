@@ -37,7 +37,7 @@ const main = async () => {
     extraction.extract();
     const translator = new SrtTranslator(
       extraction.outputFile,
-      extraction.outputFile
+      extraction.outputFile.split(".").slice(0, -1).join(".") + ".es.srt"
     );
   }
 };
