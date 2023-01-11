@@ -33,7 +33,7 @@ export default class Installation {
       const newRcFile = this.bashrc + alias;
       this.writeRcFile(RcFiles.bashrc, newRcFile);
       console.log(
-        `Installation successful, restart your terminal or run:\n    source ${os.homedir()}/.${
+        `Installation successful, restart your terminal or run:\n    source ${os.homedir()}/${
           RcFiles.bashrc
         }`
       );
