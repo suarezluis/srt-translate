@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "gh-pages -d dist",
     "serve": "live-server --port=3333 --entry-file=./dist/index.html --no-browser",
-    "build": "tsc --outDir build"
+    "build": "tsc --outDir build",
+    "install": "npm run build ; node build/index.js install"
   },
   "keywords": [],
   "author": "",
