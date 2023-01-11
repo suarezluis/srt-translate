@@ -12,7 +12,7 @@ export default class StrExtractor {
     execSync(
       `ffmpeg -y -i ${this.inputFile} -f srt ${this.outputFile.replace(
         /\ /g,
-        " "
+        "."
       )}`,
       {
         stdio: "pipe",
