@@ -1,5 +1,5 @@
 import { exec, execSync } from "child_process";
-import { writeFileSync, readFileSync } from "fs";
+import { writeFileSync, readFileSync, unlinkSync } from "fs";
 import { randomUUID } from "crypto";
 import { launch } from "puppeteer";
 import chalk from "chalk";
@@ -33,8 +33,13 @@ export default class SrtTranslator {
   inputSrtHTML: string;
   childProcess: any;
   pathToDist: string;
+  removeInputOnCompletion: boolean;
 
-  constructor(inputFileName: string, outputFileName: string) {
+  constructor(
+    inputFileName: string,
+    outputFileName: string,
+    removeInputOnCompletion = false
+  ) {
     this.localDeployment = true;
     this.pathToDist = path.join(__dirname, "..", "dist");
     this.localPageURL = localServerURL || "";
@@ -50,6 +55,7 @@ export default class SrtTranslator {
     this.inputStrObjects = this.fileContentToSrtObjects(this.inputFileContent);
     this.inputSrtHTML = this.convertStrObjectsToHTML(this.inputStrObjects);
     this.run();
+    this.removeInputOnCompletion = removeInputOnCompletion;
   }
 
   run = async () => {
@@ -73,7 +79,21 @@ export default class SrtTranslator {
     this.printStatus("Writing translated file", "Working", "yellow");
     this.writeContentToFile(this.outputFileName, translatedStrString);
     this.printStatus("Writing translated file", "Done", "green", true);
-    this.printStatus(`\n${this.outputFileName}`, "Complete\n", "green", true);
+    if (this.removeInputOnCompletion) {
+      this.printStatus(
+        `\n Removing ${this.inputFileName}`,
+        "Working",
+        "yellow"
+      );
+      unlinkSync(this.inputFileName);
+      this.printStatus(`\n${this.outputFileName}`, "Working", "green", true);
+    }
+    this.printStatus(
+      `\n Removing ${this.inputFileName}`,
+      "Complete\n",
+      "green",
+      true
+    );
   };
 
   readFile(fileName: string) {
