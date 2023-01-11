@@ -34,9 +34,14 @@ const main = async () => {
       const fileToRename = path.join(currentDirectory, process.argv[3] || "");
       const renamedFile = path.join(
         currentDirectory,
-        process.argv[3]?.replace(/\n/g, ".") || ""
+        process.argv[3]?.replace(/\ /g, ".") || ""
       );
-      console.log(`Renaming ${fileToRename} to ${renamedFile}...`);
+      console.log(
+        `Renaming ${process.argv[3]} to ${process.argv[3]?.replace(
+          /\ /g,
+          "."
+        )}...`
+      );
       renameSync(fileToRename, renamedFile);
       return;
   }
