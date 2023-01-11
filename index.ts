@@ -3,6 +3,7 @@ import path from "path";
 import StrExtractor from "./Classes/StrExtractor";
 import Installation from "./Classes/Install";
 import SrtTranslator from "./Classes/StrTranslator";
+import { renameSync } from "fs";
 
 const currentDirectory = process.cwd();
 const command = process.argv[2];
@@ -25,8 +26,17 @@ const main = async () => {
                 [command] can be one of the following:
                 -h, --help: show this help message
                 install: install the srt-translate command into rc file
+                rename: rename a file to remove spaces from the name
         `
       );
+      return;
+    case "rename":
+      const fileToRename = path.join(currentDirectory, process.argv[3] || "");
+      const renamedFile = path.join(
+        currentDirectory,
+        process.argv[3]?.replace(/\n/g, ".") || ""
+      );
+      renameSync(fileToRename, renamedFile);
       return;
   }
   if (inputFile === currentDirectory) {
