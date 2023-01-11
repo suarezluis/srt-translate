@@ -1,0 +1,21 @@
+node_modules
+build
+dist
+*.srt
+*.html
+*.json
+.env
+
+
+# video extensions
+*.mp4
+*.mov
+*.wmv
+*.avi
+*.avchd
+*.flv
+*.f4v
+*.swf
+*.mkv
+*.webm
+*.html5
