@@ -3,9 +3,10 @@ import { writeFileSync, readFileSync } from "fs";
 import { randomUUID } from "crypto";
 import { launch } from "puppeteer";
 import chalk from "chalk";
+import path from "path";
 import * as dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, "..", ".env") });
 export interface SrtObject {
   number: string;
   time: string;
@@ -31,9 +32,11 @@ export default class SrtTranslator {
   inputStrObjects: any[];
   inputSrtHTML: string;
   childProcess: any;
+  pathToDist: string;
 
   constructor(inputFileName: string, outputFileName: string) {
     this.localDeployment = true;
+    this.pathToDist = path.join(__dirname, "..", "dist");
     this.localPageURL = localServerURL || "";
     this.githubPagesURL = githubPagesURL || "";
     this.translatedLocalPageURL = translatedLocalPageURL || "";
@@ -50,7 +53,10 @@ export default class SrtTranslator {
   }
 
   run = async () => {
-    this.writeContentToFile("./dist/index.html", this.inputSrtHTML);
+    this.writeContentToFile(
+      path.join(this.pathToDist, "index.html"),
+      this.inputSrtHTML
+    );
     if (this.localDeployment) {
       await this.deployLocally();
       await this.testLocalPage();
@@ -122,14 +128,18 @@ export default class SrtTranslator {
   };
 
   deployLocally = async () => {
+    const pathToServe = path.join(__dirname, "..", "dist", "index.html");
     this.printStatus("Deploying to localhost:3333", "Working", "yellow");
-    this.childProcess = exec("npm run serve", (error, stdout, stderr) => {
-      // console.log(stdout);
-      console.log(stderr);
-      if (error !== null) {
-        // console.log(`exec error: ${error}`);
+    this.childProcess = exec(
+      `live-server --port=3333 --no-browser ${pathToServe}`,
+      (error, stdout, stderr) => {
+        // console.log(stdout);
+        console.log(stderr);
+        if (error !== null) {
+          // console.log(`exec error: ${error}`);
+        }
       }
-    });
+    );
     await this.delay(1000);
     this.printStatus("Deploying to localhost:3333", "Deployed", "green", true);
   };
@@ -144,7 +154,6 @@ export default class SrtTranslator {
     this.printStatus("Opening page", "Waiting", "yellow");
     const page = await browser.newPage();
     this.printStatus("Opening page", "Done", "green", true);
-
     this.printStatus(`Navigating to ${this.localPageURL}`, "waiting", "yellow");
     await page.goto(this.localPageURL);
     this.printStatus(
@@ -353,7 +362,10 @@ export default class SrtTranslator {
       return data;
     });
     const pageContent = await page.content();
-    writeFileSync("./dist/translated.html", pageContent, "utf-8");
+    this.writeContentToFile(
+      path.join(this.pathToDist, "translated.html"),
+      pageContent
+    );
     this.translatedHTML = pageContent;
     this.srtTranslatedObjects = srtTranslatedObjects;
     await browser.close();
