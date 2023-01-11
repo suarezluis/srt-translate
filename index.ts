@@ -29,7 +29,7 @@ const main = async () => {
       );
       return;
   }
-  if (!inputFile) {
+  if (inputFile === currentDirectory) {
     console.log("Please provide an input file");
     return;
   }
