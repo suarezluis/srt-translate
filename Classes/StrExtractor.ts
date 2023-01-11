@@ -9,9 +9,15 @@ export default class StrExtractor {
   }
   extract = () => {
     console.log(this.outputFile);
-    execSync(`ffmpeg -y -i ${this.inputFile} -f srt ${this.outputFile}`, {
-      stdio: "pipe",
-    });
+    execSync(
+      `ffmpeg -y -i ${this.inputFile} -f srt ${this.outputFile.replace(
+        /\ /g,
+        " "
+      )}`,
+      {
+        stdio: "pipe",
+      }
+    );
   };
   listStream = () => {
     execSync(`ffprobe ${this.inputFile}`);
