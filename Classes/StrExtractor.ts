@@ -8,16 +8,9 @@ export default class StrExtractor {
     this.outputFile = inputFile.split(".").slice(0, -1).join(".") + ".srt";
   }
   extract = () => {
-    console.log(this.outputFile);
-    execSync(
-      `ffmpeg -y -i ${this.inputFile} -f srt ${this.outputFile.replace(
-        /\ /g,
-        "."
-      )}`,
-      {
-        stdio: "pipe",
-      }
-    );
+    execSync(`ffmpeg -y -i ${this.inputFile} -f srt ${this.outputFile}`, {
+      stdio: "pipe",
+    });
   };
   listStream = () => {
     execSync(`ffprobe ${this.inputFile}`);
