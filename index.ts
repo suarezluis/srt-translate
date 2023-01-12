@@ -42,6 +42,11 @@ const main = async () => {
         `
       );
       return;
+    case "get-streams" || "-gs":
+      const inputFile = outputFile;
+      const extraction = new StrExtractor(inputFile);
+      extraction.listStreams();
+      return;
     case "rename" || "-r":
       renameFile(process.argv[3]);
       return;

@@ -1,4 +1,5 @@
-import { execSync } from "child_process";
+import { writeFileSync } from "fs";
+import { execSync, spawn } from "child_process";
 
 export default class StrExtractor {
   inputFile: string;
@@ -12,8 +13,14 @@ export default class StrExtractor {
       stdio: "pipe",
     });
   };
-  listStream = () => {
-    execSync(`ffprobe ${this.inputFile}`);
+  listStreams = () => {
+    const ls = execSync(`ffprobe ${this.inputFile}`, {
+      encoding: "utf8",
+    });
+    const re = /Stream #([0-9]*):([0-9]*)\(([a-z]*)\): ([a-zA-Z]*)/;
+    const stdOut = ls.toString();
+    writeFileSync("ffprobe.txt", stdOut);
+    // console.log(ls.toString());
   };
   extractStream = (stream: number) => {
     execSync(
