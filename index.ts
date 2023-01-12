@@ -39,6 +39,7 @@ const main = async () => {
                 install: install the srt-translate command into rc file
                 rename: rename a file to remove spaces from the name
                 rename-all: rename all files in the current directory to remove spaces from the name
+
         `
       );
       return;
@@ -51,14 +52,27 @@ const main = async () => {
       renameFile(process.argv[3]);
       return;
     case "rename-all" || "-ra":
-      const extension = process.argv[3] || "";
+      const extensionToRename = process.argv[3] || "";
+
+      const filesToRename = readdirSync(currentDirectory);
+      const filteredFilesByExtensionToRename = filesToRename.filter((file) =>
+        file.split(".").pop()?.includes(extensionToRename)
+      );
+      for (const file of filteredFilesByExtensionToRename) {
+        renameFile(file);
+      }
+      break;
+      return;
+    case "translate-all" || "-ta":
+      const extensionToTranslate = process.argv[3] || "";
 
       const files = readdirSync(currentDirectory);
-      const filteredFilesByExtension = files.filter((file) =>
-        file.split(".").pop()?.includes(extension)
+      const filteredFilesByExtensionToTranslate = files.filter((file) =>
+        file.split(".").pop()?.includes(extensionToTranslate)
       );
-      for (const file of filteredFilesByExtension) {
-        renameFile(file);
+      for (const file of filteredFilesByExtensionToTranslate) {
+        console.log(file);
+        translateFromVideoFile(path.join(currentDirectory, file || ""));
       }
       return;
   }
@@ -70,14 +84,18 @@ const main = async () => {
   if (inputExtension === "srt") {
     new SrtTranslator(inputFile, outputFile);
   } else {
-    const extraction = new StrExtractor(inputFile);
-    extraction.extract();
-    new SrtTranslator(
-      extraction.outputFile,
-      extraction.outputFile.split(".").slice(0, -1).join(".") + ".es.srt",
-      true
-    );
+    translateFromVideoFile(inputFile);
   }
+};
+
+const translateFromVideoFile = async (inputFile: string) => {
+  const extraction = new StrExtractor(inputFile);
+  extraction.extract();
+  new SrtTranslator(
+    extraction.outputFile,
+    extraction.outputFile.split(".").slice(0, -1).join(".") + ".es.srt",
+    true
+  );
 };
 
 main();
