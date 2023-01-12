@@ -31,7 +31,7 @@ const main = async () => {
       const installation = new Installation();
       installation.install();
       return;
-    case "-h" || "--help":
+    case "-h":
       console.log(
         `Usage: srt-translate [command] [input file] [output file]\n
                 [command] can be one of the following:
@@ -43,15 +43,15 @@ const main = async () => {
         `
       );
       return;
-    case "get-streams" || "-gs":
+    case "get-streams":
       const inputFile = outputFile;
       const extraction = new StrExtractor(inputFile);
       extraction.listStreams();
       return;
-    case "rename" || "-r":
+    case "rename":
       renameFile(process.argv[3]);
       return;
-    case "rename-all" || "-ra":
+    case "rename-all":
       const extensionToRename = process.argv[3] || "";
 
       const filesToRename = readdirSync(currentDirectory);
@@ -61,10 +61,10 @@ const main = async () => {
       for (const file of filteredFilesByExtensionToRename) {
         renameFile(file);
       }
-      break;
       return;
-    case "translate-all" || "-ta":
-      const extensionToTranslate = process.argv[3] || "";
+    case "translate-all":
+      console.log("---her");
+      const extensionToTranslate = process.argv[3] || "mkv";
 
       const files = readdirSync(currentDirectory);
       const filteredFilesByExtensionToTranslate = files.filter((file) =>
