@@ -63,7 +63,6 @@ const main = async () => {
       }
       return;
     case "translate-all":
-      console.log("---her");
       const extensionToTranslate = process.argv[3] || "mkv";
 
       const files = readdirSync(currentDirectory);
@@ -71,8 +70,8 @@ const main = async () => {
         file.split(".").pop()?.includes(extensionToTranslate)
       );
       for (const file of filteredFilesByExtensionToTranslate) {
-        console.log(file);
-        translateFromVideoFile(path.join(currentDirectory, file || ""));
+        console.log("Translating", file);
+        await translateFromVideoFile(path.join(currentDirectory, file || ""));
       }
       return;
   }
