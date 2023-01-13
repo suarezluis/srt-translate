@@ -55,7 +55,6 @@ export default class SrtTranslator {
     this.inputFileContent = this.readFile(this.inputFileName);
     this.inputStrObjects = this.fileContentToSrtObjects(this.inputFileContent);
     this.inputSrtHTML = this.convertStrObjectsToHTML(this.inputStrObjects);
-    this.run();
     this.removeInputOnCompletion = removeInputOnCompletion;
   }
 

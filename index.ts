@@ -90,11 +90,12 @@ const main = async () => {
 const translateFromVideoFile = async (inputFile: string) => {
   const extraction = new StrExtractor(inputFile);
   extraction.extract();
-  new SrtTranslator(
+  const translator = new SrtTranslator(
     extraction.outputFile,
     extraction.outputFile.split(".").slice(0, -1).join(".") + ".es.srt",
     true
   );
+  await translator.run();
 };
 
 main();
