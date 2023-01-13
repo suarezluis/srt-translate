@@ -74,7 +74,6 @@ const main = async () => {
       );
       console.log("Files found:\n", filteredFilesByExtensionToTranslate);
       for (const file of filteredFilesByExtensionToTranslate) {
-        console.log("Translating", file);
         await translateFromVideoFile(path.join(currentDirectory, file || ""));
       }
       process.exit(0);
