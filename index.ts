@@ -24,6 +24,9 @@ const main = async () => {
   // console.log(currentDirectory);
   // console.log(inputFile);
   // console.log(outputFile);
+  // const fulPath = path.join(currentDirectory, "luis.mkv" || "");
+  // console.log(fulPath);
+  // console.log(path.parse(fulPath).base);
   // return;
   console.log("");
   switch (command) {
@@ -74,6 +77,7 @@ const main = async () => {
         console.log("Translating", file);
         await translateFromVideoFile(path.join(currentDirectory, file || ""));
       }
+      process.exit(0);
       return;
   }
   if (inputFile === currentDirectory) {
@@ -85,10 +89,12 @@ const main = async () => {
     new SrtTranslator(inputFile, outputFile);
   } else {
     translateFromVideoFile(inputFile);
+    process.exit(0);
   }
 };
 
 const translateFromVideoFile = async (inputFile: string) => {
+  console.log("Processing", path.parse(inputFile).base);
   const extraction = new StrExtractor(inputFile);
   extraction.extract();
   const translator = new SrtTranslator(
