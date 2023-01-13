@@ -91,7 +91,6 @@ export default class SrtTranslator {
       removingInputFileStatus.complete();
     }
     console.log("");
-    process.exit(0);
   };
 
   readFile(fileName: string) {
