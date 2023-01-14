@@ -87,7 +87,7 @@ const main = async () => {
   if (inputExtension === "srt") {
     new SrtTranslator(inputFile, outputFile);
   } else {
-    translateFromVideoFile(inputFile);
+    await translateFromVideoFile(inputFile);
     process.exit(0);
   }
 };
