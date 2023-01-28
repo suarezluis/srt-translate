@@ -41,7 +41,7 @@ export default class SrtTranslator {
     outputFileName: string,
     removeInputOnCompletion = false
   ) {
-    this.localDeployment = false;
+    this.localDeployment = true;
     this.pathToDist = path.join(__dirname, "..", "dist");
     this.localPageURL = localServerURL || "";
     this.githubPagesURL = githubPagesURL || "";
