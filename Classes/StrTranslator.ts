@@ -301,7 +301,7 @@ export default class SrtTranslator {
         return i;
       }, i);
 
-      await this.delay(50);
+      await this.delay(100);
       currentHeight += windowHeight;
       const percentage = parseInt(`${(currentHeight / scrollHeight) * 100}`);
       scrollStatus.update(stringToEmoji(percentage + "%"), "yellow");
